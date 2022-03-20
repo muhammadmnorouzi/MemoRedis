@@ -1,3 +1,4 @@
+using System;
 using System.Text.Json;
 using MemoRedis.API.Common;
 using Xunit;
@@ -30,6 +31,17 @@ namespace MemoRedis.Tests.Unit.Common
 
             Assert.Equal<int>(person.Age, personData.Age);
             Assert.Equal<string>(person.Name, personData.Name);
+        }
+
+        [Fact]
+        public void ShouldThrowArgumentNullException()
+        {
+            Person person = null!;
+
+            Assert.Throws<ArgumentNullException>(() =>
+            {
+                JsonResult<Person> personJsonResult = person;
+            });
         }
     }
 }
