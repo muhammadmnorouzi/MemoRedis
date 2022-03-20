@@ -20,5 +20,16 @@ namespace MemoRedis.Tests.Unit.Common
             Assert.Equal<string>(expectedJsonString, personJsonResult.JsonData);
         }
 
+        [Fact]
+        public void ShouldDeserializeImplicitly()
+        {
+            var person = new Person(Name: "Muhammad.M", Age: 512);
+
+            JsonResult<Person> personJsonResult = person;
+            Person personData = personJsonResult;
+
+            Assert.Equal<int>(person.Age, personData.Age);
+            Assert.Equal<string>(person.Name, personData.Name);
+        }
     }
 }
