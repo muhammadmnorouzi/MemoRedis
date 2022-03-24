@@ -12,7 +12,7 @@ services:
       - 5009:5009
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - ConnectionStrings:RedisConStr = "127.0.0.1:6379"
+      - ConnectionStrings:RedisConStr="127.0.0.1:6379"
     volumes:
       - ~/.vsdbg:/remote_debugger:rw
 
