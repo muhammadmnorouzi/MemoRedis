@@ -1,3 +1,4 @@
+using MemoRedis.API.Data;
 using StackExchange.Redis;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -5,6 +6,8 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddSingleton<IConnectionMultiplexer>(options =>
     ConnectionMultiplexer.Connect(builder.Configuration.GetConnectionString("RedisConStr")));
+
+builder.Services.AddScoped<IMemoryRepository, RedisMemoryRepository>();
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
