@@ -29,14 +29,16 @@ namespace MemoRedis.API.Data
         public IEnumerable<Memory?> GetAllMemories()
         {
             IDatabase db = _redis.GetDatabase();
-            RedisValue[] allMemories = db.SetMembers(MemoryHashName);
+            HashEntry[] allMemories = db.HashGetAll(MemoryHashName);
 
             if (allMemories.Length is 0)
             {
                 return Array.Empty<Memory>();
             }
 
-            return Array.ConvertAll(array: allMemories, value => JsonSerializer.Deserialize<Memory>(value!));
+            return Array.ConvertAll(
+                array: allMemories,
+                he => JsonSerializer.Deserialize<Memory>(he.Value!));
         }
 
         public Memory? GetMemoryById(string id)

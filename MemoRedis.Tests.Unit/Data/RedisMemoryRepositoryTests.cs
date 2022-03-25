@@ -158,15 +158,15 @@ namespace MemoRedis.Tests.Unit.Data
         public void ShouldReturnEmptyIfNothingExists()
         {
             // Given
-            _databaseMock.Setup(x => x.SetMembers(MemoryHashName, CommandFlags.None))
-                .Returns(Array.Empty<RedisValue>());
+            _databaseMock.Setup(x => x.HashGetAll(MemoryHashName, CommandFlags.None))
+                .Returns(Array.Empty<HashEntry>());
 
             // When
             IEnumerable<Memory?> dbMemories = _memoryRepository.GetAllMemories();
 
             // Then
             _redisMock.Verify(x => x.GetDatabase(-1, null), Times.Once);
-            _databaseMock.Verify(x => x.SetMembers(MemoryHashName, CommandFlags.None), Times.Once);
+            _databaseMock.Verify(x => x.HashGetAll(MemoryHashName, CommandFlags.None), Times.Once);
 
             Assert.NotNull(dbMemories);
 
