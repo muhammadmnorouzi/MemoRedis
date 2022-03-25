@@ -20,8 +20,10 @@ namespace MemoRedis.API.Data
             IDatabase db = _redis.GetDatabase();
 
             string serializedMemory = JsonSerializer.Serialize(memory);
+            HashEntry[] hashEntryToAdd = new HashEntry[]
+                {new HashEntry(memory.Id , serializedMemory)};
 
-            db.SetAdd(MemoryHashName, serializedMemory);
+            db.HashSet(MemoryHashName, hashEntryToAdd);
         }
 
         public IEnumerable<Memory?> GetAllMemories()
