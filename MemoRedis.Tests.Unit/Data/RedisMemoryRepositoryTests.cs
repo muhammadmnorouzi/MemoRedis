@@ -106,7 +106,7 @@ namespace MemoRedis.Tests.Unit.Data
             string not_existing_memory_id = Memory.CreateId(Guid.NewGuid());
 
             _databaseMock
-                .Setup(x => x.StringGet(not_existing_memory_id, CommandFlags.None))
+                .Setup(x => x.HashGet(MemoryHashName, not_existing_memory_id, CommandFlags.None))
                 .Returns<RedisValue>(null);
 
             // When
@@ -114,7 +114,7 @@ namespace MemoRedis.Tests.Unit.Data
 
             // Then
             _redisMock.Verify(x => x.GetDatabase(-1, null), Times.Once);
-            _databaseMock.Verify(x => x.StringGet(not_existing_memory_id, CommandFlags.None), Times.Once);
+            _databaseMock.Verify(x => x.HashGet(MemoryHashName, not_existing_memory_id, CommandFlags.None), Times.Once);
 
             Assert.Equal(null, dbMemory);
         }
