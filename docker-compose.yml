@@ -9,4 +9,17 @@ services:
       context: .
       dockerfile: MemoRedis.API/Dockerfile
     ports:
-      - 5009:5009
+      - 8000:5009
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - "ConnectionStrings:RedisConStr=redis_db"
+    volumes:
+      - ~/.vsdbg:/remote_debugger:rw
+    depends_on:
+      - redis
+
+  redis:
+    image: redis
+    container_name: redis_db
+    ports:
+      - "6037:9037"

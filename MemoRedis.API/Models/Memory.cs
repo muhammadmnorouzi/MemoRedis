@@ -9,7 +9,7 @@ namespace MemoRedis.API.Models
 
         }
 
-        public Memory(string? id, string desctiption, DateTimeOffset date)
+        public Memory(string? id, string desctiption, DateTimeOffset date) : this()
         {
             Id = id ?? CreateId(Guid.NewGuid());
             Desctiption = desctiption;
