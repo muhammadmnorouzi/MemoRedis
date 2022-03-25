@@ -38,9 +38,7 @@ namespace MemoRedis.Tests.Unit.Data
         public void ShouldCreateMemory()
         {
             // Given
-            string id = Memory.CreateId(Guid.NewGuid()); // You can complain about inconsistency of Id. That does not matter
-            DateTimeOffset date = DateTimeOffset.UtcNow;
-            Memory memoryToAdd = new Memory(id, "this is description", date);
+            Memory memoryToAdd = CreateMemory();
             JsonResult<Memory> serializedMemory = memoryToAdd;
 
             string insertedKey = string.Empty;
@@ -80,9 +78,30 @@ namespace MemoRedis.Tests.Unit.Data
             });
         }
 
-        public void ShouldGetMemoryById()
+        [Fact]
+        public void ShouldGetExistingMemoryById()
         {
+            // Given
+            Memory existingMemory = CreateMemory();
+            JsonResult<Memory> jsonMemory = existingMemory;
+            _databaseMock.Setup(x => x.StringGet(existingMemory.Id, CommandFlags.None)).Returns(jsonMemory.JsonData);
 
+            // When
+            Memory? dbMemory = _memoryRepository.GetMemoryById(existingMemory.Id);
+
+            // Then
+            _redisMock.Verify(x => x.GetDatabase(-1, null), Times.Once);
+            _databaseMock.Verify(x => x.StringGet(existingMemory.Id, CommandFlags.None), Times.Once);
+
+            Assert.Equal(existingMemory.Id, dbMemory?.Id);
+            Assert.Equal(existingMemory.Desctiption, dbMemory?.Desctiption);
+            Assert.Equal(existingMemory.Date, dbMemory?.Date);
+        }
+
+        private Memory CreateMemory()
+        {
+            // You may complain about inconsistency of Id. That does not matter
+            return new Memory(Memory.CreateId(Guid.NewGuid()), "this is description", DateTimeOffset.UtcNow);
         }
     }
 }
