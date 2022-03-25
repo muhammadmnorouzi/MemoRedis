@@ -129,11 +129,11 @@ namespace MemoRedis.Tests.Unit.Data
                 .ToArray();
 
             _databaseMock
-                .Setup(x => x.SetMembers(MemoryHashName, CommandFlags.None))
+                .Setup(x => x.HashGetAll(MemoryHashName, CommandFlags.None))
                 .Returns(Enumerable.Select(allMemories, (memo) =>
                 {
                     string serializedMemory = JsonSerializer.Serialize(memo);
-                    return new RedisValue(serializedMemory);
+                    return new HashEntry(memo.Id, serializedMemory);
                 }).ToArray());
 
             // When
@@ -141,7 +141,7 @@ namespace MemoRedis.Tests.Unit.Data
 
             // Then
             _redisMock.Verify(x => x.GetDatabase(-1, null), Times.Once);
-            _databaseMock.Verify(x => x.SetMembers(MemoryHashName, CommandFlags.None), Times.Once);
+            _databaseMock.Verify(x => x.HashGetAll(MemoryHashName, CommandFlags.None), Times.Once);
 
             Assert.Equal(allMemories.Count(), dbMemories.Count());
 
