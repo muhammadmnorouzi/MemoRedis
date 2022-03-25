@@ -43,7 +43,7 @@ namespace MemoRedis.API.Data
         {
             IDatabase db = _redis.GetDatabase();
 
-            string memorySerialized = db.StringGet(id);
+            string memorySerialized = db.HashGet(MemoryHashName, id);
 
             if (memorySerialized is null or { Length: 0 })
             {
