@@ -84,7 +84,10 @@ namespace MemoRedis.Tests.Unit.Data
             // Given
             Memory existingMemory = CreateMemory();
             JsonResult<Memory> jsonMemory = existingMemory;
-            _databaseMock.Setup(x => x.StringGet(existingMemory.Id, CommandFlags.None)).Returns(jsonMemory.JsonData);
+
+            _databaseMock
+                .Setup(x => x.StringGet(existingMemory.Id, CommandFlags.None))
+                .Returns(jsonMemory.JsonData);
 
             // When
             Memory? dbMemory = _memoryRepository.GetMemoryById(existingMemory.Id);
@@ -96,6 +99,26 @@ namespace MemoRedis.Tests.Unit.Data
             Assert.Equal(existingMemory.Id, dbMemory?.Id);
             Assert.Equal(existingMemory.Desctiption, dbMemory?.Desctiption);
             Assert.Equal(existingMemory.Date, dbMemory?.Date);
+        }
+
+        [Fact]
+        public void ShouldReturnNullIfMemoryNotExists()
+        {
+            // Given
+            string not_existing_memory_id = Memory.CreateId(Guid.NewGuid());
+
+            _databaseMock
+                .Setup(x => x.StringGet(not_existing_memory_id, CommandFlags.None))
+                .Returns<RedisValue>(null);
+
+            // When
+            Memory? dbMemory = _memoryRepository.GetMemoryById(not_existing_memory_id);
+
+            // Then
+            _redisMock.Verify(x => x.GetDatabase(-1, null), Times.Once);
+            _databaseMock.Verify(x => x.StringGet(not_existing_memory_id, CommandFlags.None), Times.Once);
+
+            Assert.Equal(null, dbMemory);
         }
 
         private Memory CreateMemory()
