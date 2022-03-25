@@ -9,6 +9,8 @@ namespace MemoRedis.API.Data
 {
     public sealed class RedisMemoryRepository : IMemoryRepository
     {
+        const string MemorySetName = "memorySet";
+
         private readonly IConnectionMultiplexer _redis;
 
         public RedisMemoryRepository(IConnectionMultiplexer redis!!)
@@ -22,12 +24,21 @@ namespace MemoRedis.API.Data
 
             JsonResult<Memory> serializedMemory = memory;
 
-            db.StringSet(memory.Id, serializedMemory.JsonData);
+            db.StringSet(memory.Id, serializedMemory.JsonData); // I know redundancy
+            db.SetAdd(MemorySetName, serializedMemory.JsonData);
         }
 
-        public IEnumerable<Memory> GetAllMemories()
+        public IEnumerable<Memory?> GetAllMemories()
         {
-            throw new NotImplementedException();
+            IDatabase db = _redis.GetDatabase();
+            RedisValue[] allMemories = db.SetMembers(MemorySetName);
+
+            if (allMemories.Length is 0)
+            {
+                return Array.Empty<Memory>();
+            }
+
+            return Array.ConvertAll(array: allMemories, value => JsonSerializer.Deserialize<Memory>(value!));
         }
 
         public Memory? GetMemoryById(string id)

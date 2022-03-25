@@ -6,6 +6,6 @@ namespace MemoRedis.API.Data
     {
         void CreateMemory(Memory memory);
         Memory? GetMemoryById(string id);
-        IEnumerable<Memory> GetAllMemories();
+        IEnumerable<Memory?> GetAllMemories();
     }
 }
