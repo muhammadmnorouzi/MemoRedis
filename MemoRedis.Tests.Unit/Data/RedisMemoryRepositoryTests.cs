@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Text.Json;
 using MemoRedis.API.Common;
 using MemoRedis.API.Data;
@@ -64,9 +66,7 @@ namespace MemoRedis.Tests.Unit.Data
 
             Memory? insertedMemory = JsonSerializer.Deserialize<Memory>(insertedValue);
 
-            Assert.Equal(memoryToAdd.Id, insertedMemory?.Id);
-            Assert.Equal(memoryToAdd.Desctiption, insertedMemory?.Desctiption);
-            Assert.Equal(memoryToAdd.Date, insertedMemory?.Date);
+            AssertTwoMemories(memoryToAdd, insertedMemory);
         }
 
         [Fact]
@@ -96,9 +96,7 @@ namespace MemoRedis.Tests.Unit.Data
             _redisMock.Verify(x => x.GetDatabase(-1, null), Times.Once);
             _databaseMock.Verify(x => x.StringGet(existingMemory.Id, CommandFlags.None), Times.Once);
 
-            Assert.Equal(existingMemory.Id, dbMemory?.Id);
-            Assert.Equal(existingMemory.Desctiption, dbMemory?.Desctiption);
-            Assert.Equal(existingMemory.Date, dbMemory?.Date);
+            AssertTwoMemories(existingMemory, dbMemory);
         }
 
         [Fact]
@@ -121,10 +119,53 @@ namespace MemoRedis.Tests.Unit.Data
             Assert.Equal(null, dbMemory);
         }
 
+        [Fact]
+        public void ShouldRetrieveAll()
+        {
+            // Given
+            IEnumerable<Memory> allMemories = Enumerable
+                .Range(0, 10)
+                .Select(x => CreateMemory())
+                .ToArray();
+
+            _databaseMock
+                .Setup(x => x.SetMembers(MemorySetName, CommandFlags.None))
+                .Returns(allMemories.Select(x =>
+                    new JsonResult<Memory>(x).JsonData)
+                        .Select(x => new RedisValue(x))
+                        .ToArray());
+            // When
+            IEnumerable<Memory?> dbMemories = _memoryRepository.GetAllMemories();
+
+            // Then
+            _redisMock.Verify(x => x.GetDatabase(-1, null), Times.Once);
+            _databaseMock.Verify(x => x.SetMembers(MemorySetName, CommandFlags.None), Times.Once);
+
+            Assert.Equal(allMemories.Count(), dbMemories.Count());
+
+            foreach (Memory? dbMemory in dbMemories)
+            {
+                Memory? existing = allMemories.SingleOrDefault(x => x.Id == dbMemory?.Id);
+
+                Assert.NotNull(existing);
+                AssertTwoMemories(existing!, dbMemory);
+            }
+        }
+
+        private void AssertTwoMemories(Memory expected, Memory? actual)
+        {
+            Assert.Equal(expected.Id, actual?.Id);
+            Assert.Equal(expected.Desctiption, actual?.Desctiption);
+            Assert.Equal(expected.Date, actual?.Date);
+        }
+
         private Memory CreateMemory()
         {
             // You may complain about inconsistency of Id. That does not matter
-            return new Memory(Memory.CreateId(Guid.NewGuid()), "this is description", DateTimeOffset.UtcNow);
+            return new Memory(
+                id: Memory.CreateId(Guid.NewGuid()),
+                desctiption: "this is description",
+                date: DateTimeOffset.UtcNow);
         }
     }
 }
