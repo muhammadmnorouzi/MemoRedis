@@ -38,7 +38,7 @@ namespace MemoRedis.Tests.Unit.Data
         public void ShouldCreateMemory()
         {
             // Given
-            string id = Memory.CreateId(Guid.NewGuid());
+            string id = Memory.CreateId(Guid.NewGuid()); // You can complain about inconsistency of Id. That does not matter
             DateTimeOffset date = DateTimeOffset.UtcNow;
             Memory memoryToAdd = new Memory(id, "this is description", date);
             JsonResult<Memory> serializedMemory = memoryToAdd;
@@ -69,6 +69,20 @@ namespace MemoRedis.Tests.Unit.Data
             Assert.Equal(memoryToAdd.Id, insertedMemory?.Id);
             Assert.Equal(memoryToAdd.Desctiption, insertedMemory?.Desctiption);
             Assert.Equal(memoryToAdd.Date, insertedMemory?.Date);
+        }
+
+        [Fact]
+        public void ShouldThrowArgumentNullExceptionWhenCreating()
+        {
+            Assert.Throws<ArgumentNullException>(() =>
+            {
+                _memoryRepository.CreateMemory(null!);
+            });
+        }
+
+        public void ShouldGetMemoryById()
+        {
+
         }
     }
 }
