@@ -152,6 +152,25 @@ namespace MemoRedis.Tests.Unit.Data
             }
         }
 
+        [Fact]
+        public void ShouldReturnEmptyIfNothingExists()
+        {
+            // Given
+            _databaseMock.Setup(x => x.SetMembers(MemorySetName, CommandFlags.None))
+                .Returns(Array.Empty<RedisValue>());
+
+            // When
+            IEnumerable<Memory?> dbMemories = _memoryRepository.GetAllMemories();
+
+            // Then
+            _redisMock.Verify(x => x.GetDatabase(-1, null), Times.Once);
+            _databaseMock.Verify(x => x.SetMembers(MemorySetName, CommandFlags.None), Times.Once);
+
+            Assert.NotNull(dbMemories);
+
+            Assert.Equal(0, dbMemories.Count());
+        }
+
         private void AssertTwoMemories(Memory expected, Memory? actual)
         {
             Assert.Equal(expected.Id, actual?.Id);
