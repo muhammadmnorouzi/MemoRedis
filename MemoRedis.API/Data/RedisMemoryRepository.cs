@@ -6,7 +6,7 @@ namespace MemoRedis.API.Data
 {
     public sealed class RedisMemoryRepository : IMemoryRepository
     {
-        public string MemorySetName = "MemorySet";
+        const string MemoryHashName = "MemoryHashSet";
 
         private readonly IConnectionMultiplexer _redis;
 
@@ -21,13 +21,13 @@ namespace MemoRedis.API.Data
 
             string serializedMemory = JsonSerializer.Serialize(memory);
 
-            db.SetAdd(MemorySetName, serializedMemory);
+            db.SetAdd(MemoryHashName, serializedMemory);
         }
 
         public IEnumerable<Memory?> GetAllMemories()
         {
             IDatabase db = _redis.GetDatabase();
-            RedisValue[] allMemories = db.SetMembers(MemorySetName);
+            RedisValue[] allMemories = db.SetMembers(MemoryHashName);
 
             if (allMemories.Length is 0)
             {

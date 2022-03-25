@@ -13,7 +13,7 @@ namespace MemoRedis.Tests.Unit.Data
     public class RedisMemoryRepositoryTests
     {
         #region Constants
-        const string MemorySetName = "MemorySet";
+        const string MemoryHashName = "MemoryHashSet";
         #endregion
 
         #region Fields
@@ -40,30 +40,31 @@ namespace MemoRedis.Tests.Unit.Data
         {
             // Given
             Memory memoryToAdd = CreateMemory();
-            // string serializedMemory = JsonSerializer.Serialize(memoryToAdd);
+            string serializedMemory = JsonSerializer.Serialize(memoryToAdd);
+            HashEntry[] hashEntryToAdd = new HashEntry[] { new HashEntry(memoryToAdd.Id, serializedMemory) };
 
             string insertedKey = string.Empty;
-            string insertedValue = string.Empty;
+            HashEntry[] insertedHashEntry = default!;
 
-            _databaseMock
-                .Setup(x => x.SetAdd(It.IsAny<RedisKey>(), It.IsAny<RedisValue>(), CommandFlags.None))
-                .Callback<RedisKey, RedisValue, CommandFlags>((key, value, _) =>
+            _databaseMock.Setup(x => x
+                .HashSet(MemoryHashName, hashEntryToAdd, CommandFlags.None))
+                .Callback<RedisKey, HashEntry[], CommandFlags>((key, hashEntry, _) =>
               {
                   insertedKey = key;
-                  insertedValue = value;
-              }).Returns(true);
+                  insertedHashEntry = hashEntry;
+              });
 
             // When
             _memoryRepository.CreateMemory(memoryToAdd);
 
             // Then
             _redisMock.Verify(x => x.GetDatabase(-1, null), Times.Once);
-            _databaseMock.Verify(x => x.SetAdd(It.IsAny<RedisKey>(), It.IsAny<RedisValue>(), CommandFlags.None), Times.Once);
+            _databaseMock.Verify(x => x.HashSet(MemoryHashName, hashEntryToAdd, CommandFlags.None), Times.Once);
             _databaseMock.VerifyNoOtherCalls();
 
-            Assert.Equal(MemorySetName, insertedKey);
+            Assert.Equal(MemoryHashName, insertedKey);
 
-            Memory? insertedMemory = JsonSerializer.Deserialize<Memory>(insertedValue);
+            Memory? insertedMemory = JsonSerializer.Deserialize<Memory>(insertedHashEntry[0].Value);
 
             AssertTwoMemories(memoryToAdd, insertedMemory);
         }
@@ -128,7 +129,7 @@ namespace MemoRedis.Tests.Unit.Data
                 .ToArray();
 
             _databaseMock
-                .Setup(x => x.SetMembers(MemorySetName, CommandFlags.None))
+                .Setup(x => x.SetMembers(MemoryHashName, CommandFlags.None))
                 .Returns(Enumerable.Select(allMemories, (memo) =>
                 {
                     string serializedMemory = JsonSerializer.Serialize(memo);
@@ -140,7 +141,7 @@ namespace MemoRedis.Tests.Unit.Data
 
             // Then
             _redisMock.Verify(x => x.GetDatabase(-1, null), Times.Once);
-            _databaseMock.Verify(x => x.SetMembers(MemorySetName, CommandFlags.None), Times.Once);
+            _databaseMock.Verify(x => x.SetMembers(MemoryHashName, CommandFlags.None), Times.Once);
 
             Assert.Equal(allMemories.Count(), dbMemories.Count());
 
@@ -157,7 +158,7 @@ namespace MemoRedis.Tests.Unit.Data
         public void ShouldReturnEmptyIfNothingExists()
         {
             // Given
-            _databaseMock.Setup(x => x.SetMembers(MemorySetName, CommandFlags.None))
+            _databaseMock.Setup(x => x.SetMembers(MemoryHashName, CommandFlags.None))
                 .Returns(Array.Empty<RedisValue>());
 
             // When
@@ -165,7 +166,7 @@ namespace MemoRedis.Tests.Unit.Data
 
             // Then
             _redisMock.Verify(x => x.GetDatabase(-1, null), Times.Once);
-            _databaseMock.Verify(x => x.SetMembers(MemorySetName, CommandFlags.None), Times.Once);
+            _databaseMock.Verify(x => x.SetMembers(MemoryHashName, CommandFlags.None), Times.Once);
 
             Assert.NotNull(dbMemories);
 
