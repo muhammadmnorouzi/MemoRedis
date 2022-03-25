@@ -1,5 +1,6 @@
 using System;
 using MemoRedis.API.Data;
+using MemoRedis.API.Dtos;
 using MemoRedis.API.Models;
 using Microsoft.AspNetCore.Mvc;
 
@@ -28,11 +29,12 @@ namespace MemoRedis.API.Controllers
         }
 
         [HttpPost(Name = "Memorize")]
-        public ActionResult<Memory?> Memorize(Memory memory)
+        public ActionResult<Memory?> Memorize(CreateMemoryDto memory)
         {
-            _repo.CreateMemory(memory);
+            Memory memoryToAdd = new(Memory.CreateId(Guid.NewGuid()), memory.Description, memory.Date);
+            _repo.CreateMemory(memoryToAdd);
 
-            return CreatedAtRoute(nameof(RememberById), new { Id = memory.Id }, memory);
+            return CreatedAtRoute(nameof(RememberById), new { Id = memoryToAdd.Id }, memoryToAdd);
         }
 
         [HttpGet(Name = "RememberAllThings")]
