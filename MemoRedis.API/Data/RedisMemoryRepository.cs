@@ -24,7 +24,6 @@ namespace MemoRedis.API.Data
 
             JsonResult<Memory> serializedMemory = memory;
 
-            db.StringSet(memory.Id, serializedMemory.JsonData); // I know redundancy
             db.SetAdd(MemorySetName, serializedMemory.JsonData);
         }
 
