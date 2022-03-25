@@ -57,7 +57,6 @@ namespace MemoRedis.Tests.Unit.Data
             // When
             _memoryRepository.CreateMemory(memoryToAdd);
 
-
             // Then
             _redisMock.Verify(x => x.GetDatabase(-1, null), Times.Once);
             _databaseMock.Verify(x => x.SetAdd(It.IsAny<RedisKey>(), It.IsAny<RedisValue>(), CommandFlags.None), Times.Once);
