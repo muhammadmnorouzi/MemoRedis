@@ -9,15 +9,15 @@ namespace MemoRedis.API.Models
 
         }
 
-        public Memory(string desctiption, DateTimeOffset date)
+        public Memory(string id, string desctiption, DateTimeOffset date)
         {
+            Id = id;
             Desctiption = desctiption;
             _date = date.UtcDateTime;
         }
 
-
         [Required]
-        public string Id { get; } = $"memory:{Guid.NewGuid().ToString()}";
+        public string Id { get; } = CreateId(Guid.NewGuid());
 
         [Required]
         public string Desctiption { get; } = default!;
@@ -29,5 +29,12 @@ namespace MemoRedis.API.Models
         }
 
         private DateTimeOffset _date;
+        private Guid _id_guid_part;
+
+
+        public static string CreateId(Guid id)
+        {
+            return $"memory:{id.ToString()}";
+        }
     }
 }
