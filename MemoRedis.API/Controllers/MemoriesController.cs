@@ -34,5 +34,11 @@ namespace MemoRedis.API.Controllers
 
             return CreatedAtRoute(nameof(RememberById), new { Id = memory.Id }, memory);
         }
+
+        [HttpGet(Name = "RememberAllThings")]
+        public ActionResult<Memory?> RememberAllThings()
+        {
+            return Ok(_repo.GetAllMemories());
+        }
     }
 }
