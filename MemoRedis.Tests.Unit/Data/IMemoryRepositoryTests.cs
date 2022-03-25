@@ -1,13 +1,19 @@
+using System;
+using MemoRedis.API.Common;
 using MemoRedis.API.Data;
+using MemoRedis.API.Models;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Localization;
 using Moq;
 using StackExchange.Redis;
+using Xunit;
 
 namespace MemoRedis.Tests.Unit.Data
 {
     public class IMemoryRepositoryTests
     {
         #region Constants
-        const string TestMemorySetName = "TestMemorySet";
+        const string MemorySetName = "MemorySet";
         #endregion
 
         #region Fields
@@ -28,5 +34,29 @@ namespace MemoRedis.Tests.Unit.Data
                 .Returns(_databaseMock.Object);
         }
         #endregion
+
+        [Fact]
+        public void ShouldCreateMemory()
+        {
+            // Given
+            DateTimeOffset date = DateTimeOffset.UtcNow;
+            Memory memoryToAdd = new Memory("this is description", date);
+            JsonResult<Memory> serializedMemory = memoryToAdd;
+
+            _databaseMock
+                .Setup(x => x
+                    .SetAdd(It.IsAny<RedisKey>(), It.IsAny<RedisValue>(), CommandFlags.None))
+                .Returns(true);
+
+            // When
+            _memoryRepository.CreateMemory(memoryToAdd);
+
+            // Then
+            _redisMock.Verify(x => x.GetDatabase(-1, null), Times.Once);
+
+            _databaseMock.Verify(x => x.SetAdd(It.IsAny<RedisKey>(), It.IsAny<RedisValue>(), CommandFlags.None), Times.Once);
+
+            _databaseMock.VerifyNoOtherCalls();
+        }
     }
 }

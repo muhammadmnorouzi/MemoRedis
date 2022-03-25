@@ -9,7 +9,7 @@ namespace MemoRedis.API.Data
 {
     public sealed class RedisMemoryRepository : IMemoryRepository
     {
-        const string MemorySetName = "MemorySet";
+        public string MemorySetName = "MemorySet";
 
         private readonly IConnectionMultiplexer _redis;
 

@@ -18,7 +18,7 @@ namespace MemoRedis.Tests.Unit.Common
             JsonResult<Person> personJsonResult = person;
             string expectedJsonString = JsonSerializer.Serialize(person);
 
-            Assert.Equal<string>(expectedJsonString, personJsonResult.JsonData);
+            Assert.Equal(expectedJsonString, personJsonResult.JsonData);
         }
 
         [Fact]
@@ -30,7 +30,7 @@ namespace MemoRedis.Tests.Unit.Common
             Person personData = personJsonResult;
 
             Assert.Equal<int>(person.Age, personData.Age);
-            Assert.Equal<string>(person.Name, personData.Name);
+            Assert.Equal(person.Name, personData.Name);
         }
 
         [Fact]
