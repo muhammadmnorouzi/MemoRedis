@@ -86,15 +86,15 @@ namespace MemoRedis.Tests.Unit.Data
             string jsonMemory = JsonSerializer.Serialize(existingMemory);
 
             _databaseMock
-                .Setup(x => x.StringGet(existingMemory.Id, CommandFlags.None))
-                .Returns(jsonMemory);
+                .Setup(x => x.HashGet(MemoryHashName, existingMemory.Id, CommandFlags.None))
+                .Returns(new RedisValue(jsonMemory));
 
             // When
             Memory? dbMemory = _memoryRepository.GetMemoryById(existingMemory.Id);
 
             // Then
             _redisMock.Verify(x => x.GetDatabase(-1, null), Times.Once);
-            _databaseMock.Verify(x => x.StringGet(existingMemory.Id, CommandFlags.None), Times.Once);
+            _databaseMock.Verify(x => x.HashGet(MemoryHashName, existingMemory.Id, CommandFlags.None), Times.Once);
 
             AssertTwoMemories(existingMemory, dbMemory);
         }
