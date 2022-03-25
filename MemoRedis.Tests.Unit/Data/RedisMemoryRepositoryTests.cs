@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
-using MemoRedis.API.Common;
 using MemoRedis.API.Data;
 using MemoRedis.API.Models;
 using Moq;
@@ -41,7 +40,7 @@ namespace MemoRedis.Tests.Unit.Data
         {
             // Given
             Memory memoryToAdd = CreateMemory();
-            JsonResult<Memory> serializedMemory = memoryToAdd;
+            // string serializedMemory = JsonSerializer.Serialize(memoryToAdd);
 
             string insertedKey = string.Empty;
             string insertedValue = string.Empty;
@@ -83,11 +82,11 @@ namespace MemoRedis.Tests.Unit.Data
         {
             // Given
             Memory existingMemory = CreateMemory();
-            JsonResult<Memory> jsonMemory = existingMemory;
+            string jsonMemory = JsonSerializer.Serialize(existingMemory);
 
             _databaseMock
                 .Setup(x => x.StringGet(existingMemory.Id, CommandFlags.None))
-                .Returns(jsonMemory.JsonData);
+                .Returns(jsonMemory);
 
             // When
             Memory? dbMemory = _memoryRepository.GetMemoryById(existingMemory.Id);
@@ -130,10 +129,12 @@ namespace MemoRedis.Tests.Unit.Data
 
             _databaseMock
                 .Setup(x => x.SetMembers(MemorySetName, CommandFlags.None))
-                .Returns(allMemories.Select(x =>
-                    new JsonResult<Memory>(x).JsonData)
-                        .Select(x => new RedisValue(x))
-                        .ToArray());
+                .Returns(Enumerable.Select(allMemories, (memo) =>
+                {
+                    string serializedMemory = JsonSerializer.Serialize(memo);
+                    return new RedisValue(serializedMemory);
+                }).ToArray());
+
             // When
             IEnumerable<Memory?> dbMemories = _memoryRepository.GetAllMemories();
 

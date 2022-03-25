@@ -1,8 +1,5 @@
-using System;
 using System.Text.Json;
-using MemoRedis.API.Common;
 using MemoRedis.API.Models;
-using Microsoft.AspNetCore.Mvc;
 using StackExchange.Redis;
 
 namespace MemoRedis.API.Data
@@ -22,9 +19,9 @@ namespace MemoRedis.API.Data
         {
             IDatabase db = _redis.GetDatabase();
 
-            JsonResult<Memory> serializedMemory = memory;
+            string serializedMemory = JsonSerializer.Serialize(memory);
 
-            db.SetAdd(MemorySetName, serializedMemory.JsonData);
+            db.SetAdd(MemorySetName, serializedMemory);
         }
 
         public IEnumerable<Memory?> GetAllMemories()
