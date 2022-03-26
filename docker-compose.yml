@@ -13,8 +13,6 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
       - "ConnectionStrings:RedisConStr=redis_db"
-    volumes:
-      - ~/.vsdbg:/remote_debugger:rw
     depends_on:
       - redis
 
