@@ -21,5 +21,10 @@ services:
   redis:
     image: redis
     container_name: redis_db
+    volumes:
+      - redis_debug_data:/data
     ports:
       - "6037:9037"
+
+volumes:
+  redis_debug_data:
