@@ -95,6 +95,7 @@ namespace MemoRedis.Tests.Unit.Data
             // Then
             _redisMock.Verify(x => x.GetDatabase(-1, null), Times.Once);
             _databaseMock.Verify(x => x.HashGet(MemoryHashName, existingMemory.Id, CommandFlags.None), Times.Once);
+            _databaseMock.VerifyNoOtherCalls();
 
             AssertTwoMemories(existingMemory, dbMemory);
         }
@@ -115,6 +116,7 @@ namespace MemoRedis.Tests.Unit.Data
             // Then
             _redisMock.Verify(x => x.GetDatabase(-1, null), Times.Once);
             _databaseMock.Verify(x => x.HashGet(MemoryHashName, not_existing_memory_id, CommandFlags.None), Times.Once);
+            _databaseMock.VerifyNoOtherCalls();
 
             Assert.Equal(null, dbMemory);
         }
@@ -142,6 +144,7 @@ namespace MemoRedis.Tests.Unit.Data
             // Then
             _redisMock.Verify(x => x.GetDatabase(-1, null), Times.Once);
             _databaseMock.Verify(x => x.HashGetAll(MemoryHashName, CommandFlags.None), Times.Once);
+            _databaseMock.VerifyNoOtherCalls();
 
             Assert.Equal(allMemories.Count(), dbMemories.Count());
 
@@ -167,6 +170,7 @@ namespace MemoRedis.Tests.Unit.Data
             // Then
             _redisMock.Verify(x => x.GetDatabase(-1, null), Times.Once);
             _databaseMock.Verify(x => x.HashGetAll(MemoryHashName, CommandFlags.None), Times.Once);
+            _databaseMock.VerifyNoOtherCalls();
 
             Assert.NotNull(dbMemories);
 
